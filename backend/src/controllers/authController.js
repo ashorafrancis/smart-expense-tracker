@@ -7,7 +7,6 @@ const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // CHECK USER EXISTS
     const userExists = await User.findOne({ email });
 
     if (userExists) {
@@ -16,12 +15,10 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // HASH PASSWORD
     const salt = await bcrypt.genSalt(10);
 
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // CREATE USER
     const user = await User.create({
       name,
       email,
@@ -44,7 +41,6 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // FIND USER
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -53,7 +49,6 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // CHECK PASSWORD
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -62,15 +57,10 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // GENERATE TOKEN
     const token = jwt.sign(
-      {
-        id: user._id,
-      },
+      { id: user._id },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
+      { expiresIn: "7d" }
     );
 
     res.status(200).json({
@@ -89,7 +79,35 @@ const loginUser = async (req, res) => {
   }
 };
 
+// UPDATE PROFILE
+const updateProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
+  updateProfile,
 };

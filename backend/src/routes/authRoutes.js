@@ -3,6 +3,7 @@ const express = require("express");
 const {
   registerUser,
   loginUser,
+  updateProfile,
 } = require("../controllers/authController");
 
 const protect = require("../middleware/authMiddleware");
@@ -14,6 +15,9 @@ router.post("/register", registerUser);
 
 // LOGIN
 router.post("/login", loginUser);
+
+// UPDATE PROFILE
+router.put("/profile", protect, updateProfile);
 
 // PROTECTED ROUTE
 router.get("/profile", protect, (req, res) => {
