@@ -21,7 +21,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      resizeToAvoidBottomInset: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: AppBar(
         backgroundColor: Colors.green,
@@ -29,8 +30,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
 
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
 
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -57,7 +63,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   prefixIcon: const Icon(Icons.person),
 
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: Theme.of(context).cardColor,
 
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -76,8 +82,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   prefixIcon: const Icon(Icons.email),
 
                   filled: true,
-                  fillColor: Colors.white,
-
+                  fillColor: Theme.of(context).cardColor,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -97,7 +102,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   prefixIcon: const Icon(Icons.lock),
 
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: Theme.of(context).cardColor,
 
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -118,11 +123,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   onPressed: () async {
                     try {
-                      await ApiService.registerUser(
+                      final response = await ApiService.registerUser(
                         name: nameController.text,
-
                         email: emailController.text,
-
                         password: passwordController.text,
                       );
 
@@ -130,6 +133,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           await SharedPreferences.getInstance();
 
                       await prefs.setBool('isLoggedIn', true);
+
+                      await prefs.setString('token', response['token']);
 
                       await prefs.setString('name', nameController.text);
 

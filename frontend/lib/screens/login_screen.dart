@@ -19,11 +19,17 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      resizeToAvoidBottomInset: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
 
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -54,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   prefixIcon: const Icon(Icons.email),
 
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: Theme.of(context).cardColor,
 
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -75,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   prefixIcon: const Icon(Icons.lock),
 
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: Theme.of(context).cardColor,
 
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -112,10 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         await prefs.setString('email', emailController.text);
 
-                        await prefs.setString(
-                          'name',
-                          emailController.text.split('@')[0],
-                        );
+                        await prefs.setString('name', response['user']['name']);
 
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(response['message'])),

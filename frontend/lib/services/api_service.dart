@@ -3,7 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.1.35:5000/api';
+  static const String baseUrl =
+      'https://smart-expense-tracker-api-gtcg.onrender.com/api';
 
   static Future<String?> getToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -22,6 +23,9 @@ class ApiService {
       body: jsonEncode({'name': name, 'email': email, 'password': password}),
     );
 
+    print("REGISTER STATUS: ${response.statusCode}");
+    print("REGISTER BODY: ${response.body}");
+
     return jsonDecode(response.body);
   }
 
@@ -35,6 +39,9 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}),
     );
+
+    print("LOGIN STATUS: ${response.statusCode}");
+    print("LOGIN BODY: ${response.body}");
 
     return jsonDecode(response.body);
   }
@@ -207,5 +214,28 @@ class ApiService {
     }
 
     return categoryTotals;
+  }
+
+  static Future<Map<String, dynamic>> updateProfile({
+    required String name,
+    required String email,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final token = prefs.getString('token');
+
+    final response = await http.put(
+      Uri.parse('$baseUrl/auth/profile'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({'name': name, 'email': email}),
+    );
+
+    print("UPDATE STATUS: ${response.statusCode}");
+    print("UPDATE BODY: ${response.body}");
+
+    return jsonDecode(response.body);
   }
 }

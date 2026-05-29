@@ -22,6 +22,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   String selectedCurrency = "₹ INR";
 
+  bool isDarkMode = false;
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +41,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       avatar = prefs.getString("avatar") ?? "";
 
       selectedCurrency = prefs.getString("currency") ?? "₹ INR";
+
+      isDarkMode = prefs.getBool("darkMode") ?? false;
     });
   }
 
@@ -219,9 +223,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 leading: const Icon(Icons.dark_mode, color: Colors.green),
                 title: const Text("Dark Mode"),
                 trailing: Switch(
-                  value: Theme.of(context).brightness == Brightness.dark,
-                  onChanged: (_) {
+                  value: isDarkMode,
+                  onChanged: (_) async {
                     widget.toggleTheme();
+
+                    setState(() {
+                      isDarkMode = !isDarkMode;
+                    });
                   },
                 ),
               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/api_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -30,13 +31,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> saveProfile() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    try {
+      await ApiService.updateProfile(
+        name: nameController.text,
+        email: emailController.text,
+      );
 
-    await prefs.setString("name", nameController.text);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    await prefs.setString("email", emailController.text);
+      await prefs.setString("name", nameController.text);
 
-    Navigator.pop(context);
+      await prefs.setString("email", emailController.text);
+
+      if (!mounted) return;
+
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
   }
 
   @override

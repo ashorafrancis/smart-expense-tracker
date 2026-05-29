@@ -31,10 +31,15 @@ class _MyAppState extends State<MyApp> {
 
     setState(() {
       isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+      isDarkMode = prefs.getBool('darkMode') ?? false;
     });
   }
 
-  void toggleTheme() {
+  void toggleTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setBool('darkMode', !isDarkMode);
+
     setState(() {
       isDarkMode = !isDarkMode;
     });
