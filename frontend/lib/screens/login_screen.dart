@@ -115,6 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         await prefs.setBool('isLoggedIn', true);
 
                         await prefs.setString('token', response['token']);
+                        debugPrint(response['token']);
 
                         await prefs.setString('email', emailController.text);
 

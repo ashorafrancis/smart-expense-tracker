@@ -1,6 +1,5 @@
 const Due = require("../models/DueModel");
 
-
 // CREATE DUE
 const createDue = async (req, res) => {
   try {
@@ -23,7 +22,6 @@ const createDue = async (req, res) => {
   }
 };
 
-
 // GET ALL DUES
 const getDues = async (req, res) => {
   try {
@@ -41,6 +39,53 @@ const getDues = async (req, res) => {
   }
 };
 
+// UPDATE DUE
+const updateDue = async (req, res) => {
+  try {
+    const due = await Due.findById(req.params.id);
+
+    if (!due) {
+      return res.status(404).json({
+        message: "Due not found",
+      });
+    }
+
+    const updatedDue = await Due.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+
+    res.status(200).json(updatedDue);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+// DELETE DUE
+const deleteDue = async (req, res) => {
+  try {
+    const due = await Due.findById(req.params.id);
+
+    if (!due) {
+      return res.status(404).json({
+        message: "Due not found",
+      });
+    }
+
+    await due.deleteOne();
+
+    res.status(200).json({
+      message: "Due deleted",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 // MARK AS PAID
 const markDuePaid = async (req, res) => {
@@ -65,9 +110,10 @@ const markDuePaid = async (req, res) => {
   }
 };
 
-
 module.exports = {
   createDue,
   getDues,
+  updateDue,
+  deleteDue,
   markDuePaid,
 };

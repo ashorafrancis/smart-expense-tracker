@@ -4,6 +4,7 @@ import 'add_expense_screen.dart';
 import '../services/api_service.dart';
 import 'edit_expense_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'add_due_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -65,6 +66,19 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.add),
+
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddDueScreen()),
+          );
+
+          setState(() {});
+        },
+      ),
       appBar: AppBar(backgroundColor: Colors.green, title: const Text("Home")),
 
       body: Column(

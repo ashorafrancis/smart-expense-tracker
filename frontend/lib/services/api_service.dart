@@ -128,6 +128,7 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
+  //convertCurrency
   static double convertCurrency(double amount, String from, String to) {
     Map<String, double> rates = {"₹": 1.0, "\$": 83.0, "€": 90.0, "£": 105.0};
 
@@ -136,6 +137,7 @@ class ApiService {
     return inInr / (rates[to] ?? 1.0);
   }
 
+  //getTotalExpense
   static Future<double> getTotalExpense() async {
     final expenses = await getExpenses();
 
@@ -158,6 +160,7 @@ class ApiService {
     return total;
   }
 
+  //getMonthlyTotals
   static Future<Map<String, double>> getMonthlyTotals() async {
     final expenses = await getExpenses();
 
@@ -190,6 +193,7 @@ class ApiService {
     return monthlyTotals;
   }
 
+  //getCategoryTotals
   static Future<Map<String, double>> getCategoryTotals() async {
     final expenses = await getExpenses();
 
@@ -216,6 +220,7 @@ class ApiService {
     return categoryTotals;
   }
 
+  //updateProfile
   static Future<Map<String, dynamic>> updateProfile({
     required String name,
     required String email,
@@ -237,5 +242,81 @@ class ApiService {
     print("UPDATE BODY: ${response.body}");
 
     return jsonDecode(response.body);
+  }
+
+  //due date
+  static Future<Map<String, dynamic>> createDue({
+    required String title,
+    required double amount,
+    required String dueDate,
+    required String notes,
+    required int remindBefore,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final token = prefs.getString('token');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/dues'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'title': title,
+        'amount': amount,
+        'dueDate': dueDate,
+        'notes': notes,
+        'remindBefore': remindBefore,
+      }),
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  //getdue
+  static Future<List<dynamic>> getDues() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final token = prefs.getString('token');
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/dues'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  //deleteDue
+  static Future<Map<String, dynamic>> deleteDue(String id) async {
+    final token = await getToken();
+
+    final response = await http.delete(
+      Uri.parse('$baseUrl/dues/$id'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  //updateDue
+  static Future<void> updateDue(String id, Map<String, dynamic> data) async {
+    final token = await getToken();
+
+    await http.put(
+      Uri.parse('$baseUrl/dues/$id'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(data),
+    );
   }
 }

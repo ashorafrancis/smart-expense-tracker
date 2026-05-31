@@ -7,12 +7,18 @@ const protect = require("../middleware/authMiddleware");
 const {
   createDue,
   getDues,
+  updateDue,
+  deleteDue,
   markDuePaid,
 } = require("../controllers/dueController");
 
 router.post("/", protect, createDue);
 
 router.get("/", protect, getDues);
+
+router.put("/:id", protect, updateDue);
+
+router.delete("/:id", protect, deleteDue);
 
 router.put("/:id/paid", protect, markDuePaid);
 
