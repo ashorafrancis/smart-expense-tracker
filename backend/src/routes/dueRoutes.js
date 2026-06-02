@@ -10,6 +10,7 @@ const {
   updateDue,
   deleteDue,
   markDuePaid,
+   toggleDuePaid,
 } = require("../controllers/dueController");
 
 router.post("/", protect, createDue);
@@ -21,5 +22,7 @@ router.put("/:id", protect, updateDue);
 router.delete("/:id", protect, deleteDue);
 
 router.put("/:id/paid", protect, markDuePaid);
+
+router.put("/:id/toggle-paid", protect, toggleDuePaid);
 
 module.exports = router;

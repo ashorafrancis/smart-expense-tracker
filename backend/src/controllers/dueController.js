@@ -109,6 +109,28 @@ const markDuePaid = async (req, res) => {
     });
   }
 };
+//toggleDuePaid 
+const toggleDuePaid = async (req, res) => {
+  try {
+    const due = await Due.findById(req.params.id);
+
+    if (!due) {
+      return res.status(404).json({
+        message: "Due not found",
+      });
+    }
+
+    due.paid = !due.paid;
+
+    await due.save();
+
+    res.status(200).json(due);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
   createDue,
@@ -116,4 +138,5 @@ module.exports = {
   updateDue,
   deleteDue,
   markDuePaid,
+  toggleDuePaid,
 };
