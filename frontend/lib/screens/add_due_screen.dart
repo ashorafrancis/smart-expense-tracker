@@ -92,8 +92,13 @@ class _AddDueScreenState extends State<AddDueScreen> {
         title: Text(widget.due == null ? "Add Due" : "Edit Due"),
         backgroundColor: Colors.green,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          20,
+          20,
+          20,
+          MediaQuery.of(context).viewInsets.bottom + 20,
+        ),
         child: Column(
           children: [
             TextField(
