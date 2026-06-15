@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../services/notification_service.dart';
 
 class AddDueScreen extends StatefulWidget {
   final Map? due;
@@ -37,22 +38,37 @@ class _AddDueScreenState extends State<AddDueScreen> {
   }
 
   Future<void> pickDate() async {
-    final picked = await showDatePicker(
+    final pickedDate = await showDatePicker(
       context: context,
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
       initialDate: selectedDate ?? DateTime.now(),
     );
 
-    if (picked != null) {
-      setState(() {
-        selectedDate = picked;
-      });
-    }
+    if (pickedDate == null) return;
+
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+
+    if (pickedTime == null) return;
+
+    setState(() {
+      selectedDate = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
+    });
   }
 
   Future<void> saveDue() async {
-    if (selectedDate == null) return;
+    if (selectedDate == null) {
+      return;
+    }
 
     final data = {
       'title': titleController.text,
@@ -73,6 +89,29 @@ class _AddDueScreenState extends State<AddDueScreen> {
         );
       } else {
         await ApiService.updateDue(widget.due!["_id"], data);
+      }
+      final dueDate = selectedDate!;
+
+      final reminderDate = dueDate.subtract(Duration(days: remindBefore));
+
+      // Reminder notification
+      if (reminderDate.isAfter(DateTime.now())) {
+        await NotificationService.scheduleNotification(
+          id: 1,
+          title: "Upcoming Due",
+          body: "${titleController.text} is due in $remindBefore day(s)",
+          scheduledDate: reminderDate,
+        );
+      }
+
+      // Due date notification
+      if (dueDate.isAfter(DateTime.now())) {
+        await NotificationService.scheduleNotification(
+          id: 2,
+          title: "Due Today",
+          body: "${titleController.text} payment is due today",
+          scheduledDate: dueDate,
+        );
       }
 
       if (!mounted) return;
@@ -126,8 +165,8 @@ class _AddDueScreenState extends State<AddDueScreen> {
             ListTile(
               title: Text(
                 selectedDate == null
-                    ? "Select Due Date"
-                    : selectedDate.toString().split(" ")[0],
+                    ? "Select Due Date & Time"
+                    : selectedDate.toString(),
               ),
               trailing: const Icon(Icons.calendar_month),
               onTap: pickDate,

@@ -4,7 +4,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_screen.dart';
 
-void main() {
+import 'package:frontend/services/notification_service.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await NotificationService.initialize();
+
   runApp(const MyApp());
 }
 

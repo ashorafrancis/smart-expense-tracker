@@ -166,51 +166,76 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
                   const SizedBox(height: 20),
 
-                  SizedBox(
-                    height: 300,
+                  FutureBuilder<Map<String, double>>(
+                    future: fetchCategoryTotals(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const SizedBox();
+                      }
 
-                    child: FutureBuilder<Map<String, double>>(
-                      future: fetchCategoryTotals(),
+                      final categories = snapshot.data!;
 
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return const SizedBox();
-                        }
+                      final maxAmount = categories.values.reduce(
+                        (a, b) => a > b ? a : b,
+                      );
 
-                        final categories = snapshot.data!;
+                      return Column(
+                        children: categories.entries.map((entry) {
+                          final percentage = entry.value / maxAmount;
 
-                        return PieChart(
-                          PieChartData(
-                            sections: categories.entries.map((entry) {
-                              return PieChartSectionData(
-                                value: entry.value,
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 110,
+                                      child: Text(
+                                        entry.key,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
 
-                                title:
-                                    "${entry.key}\n$currency${entry.value.toStringAsFixed(0)}",
+                                    Expanded(
+                                      child: LinearProgressIndicator(
+                                        value: percentage,
+                                        minHeight: 14,
+                                        borderRadius: BorderRadius.circular(10),
+                                        backgroundColor: Colors.green.shade100,
+                                        valueColor: AlwaysStoppedAnimation(
+                                          Colors.green,
+                                        ),
+                                      ),
+                                    ),
 
-                                radius: 100,
+                                    const SizedBox(width: 10),
 
-                                titleStyle: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                    Text(
+                                      "$currency ${entry.value.toStringAsFixed(0)}",
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              );
-                            }).toList(),
-                          ),
-                        );
-                      },
-                    ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    },
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 10),
 
                   const Align(
                     alignment: Alignment.centerLeft,
-
                     child: Text(
-                      "Monthly Expenses",
-
+                      "Dues Summary",
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -220,33 +245,67 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
                   const SizedBox(height: 15),
 
-                  FutureBuilder<Map<String, double>>(
-                    future: fetchMonthlyTotals(),
-
+                  FutureBuilder<List<dynamic>>(
+                    future: ApiService.getDues(),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return const SizedBox();
                       }
 
-                      final months = snapshot.data!;
+                      final dues = snapshot.data!;
+
+                      final pendingDues = dues
+                          .where((due) => due["paid"] == false)
+                          .toList();
+
+                      final paidDues = dues
+                          .where((due) => due["paid"] == true)
+                          .toList();
+
+                      double totalPending = 0;
+
+                      for (var due in pendingDues) {
+                        totalPending +=
+                            double.tryParse(due["amount"].toString()) ?? 0;
+                      }
 
                       return Column(
-                        children: months.entries.map((entry) {
-                          return Card(
+                        children: [
+                          Card(
                             child: ListTile(
                               leading: const Icon(
-                                Icons.calendar_month,
+                                Icons.pending_actions,
+                                color: Colors.orange,
+                              ),
+                              title: const Text("Pending Dues"),
+                              trailing: Text("${pendingDues.length}"),
+                            ),
+                          ),
+
+                          Card(
+                            child: ListTile(
+                              leading: const Icon(
+                                Icons.check_circle,
                                 color: Colors.green,
                               ),
+                              title: const Text("Paid Dues"),
+                              trailing: Text("${paidDues.length}"),
+                            ),
+                          ),
 
-                              title: Text(entry.key),
-
+                          Card(
+                            child: ListTile(
+                              leading: const Icon(
+                                Icons.currency_rupee,
+                                color: Colors.blue,
+                              ),
+                              title: const Text("Total Pending Amount"),
                               trailing: Text(
-                                "$currency ${entry.value.toStringAsFixed(2)}",
+                                "$currency ${totalPending.toStringAsFixed(2)}",
                               ),
                             ),
-                          );
-                        }).toList(),
+                          ),
+                        ],
                       );
                     },
                   ),

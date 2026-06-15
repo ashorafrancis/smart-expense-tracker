@@ -70,6 +70,8 @@ class ApiService {
         'currency': currency,
       }),
     );
+    print("ADD EXPENSE STATUS: ${response.statusCode}");
+    print("ADD EXPENSE BODY: ${response.body}");
 
     return jsonDecode(response.body);
   }
@@ -317,6 +319,19 @@ class ApiService {
         'Authorization': 'Bearer $token',
       },
       body: jsonEncode(data),
+    );
+  }
+
+  //toggleDuePaid
+  static Future<void> toggleDuePaid(String id) async {
+    final token = await getToken();
+
+    await http.put(
+      Uri.parse('$baseUrl/dues/$id/toggle-paid'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
     );
   }
 }

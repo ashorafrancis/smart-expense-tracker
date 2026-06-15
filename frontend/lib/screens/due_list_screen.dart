@@ -44,61 +44,175 @@ class _DueListScreenState extends State<DueListScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    if (dues.isEmpty) {
+      return const Center(child: Text("No dues added yet"));
+    }
+
+    final upcomingDues = dues.where((due) => due["paid"] != true).toList();
+
+    final paidDues = dues.where((due) => due["paid"] == true).toList();
+
     return Stack(
       children: [
-        dues.isEmpty
-            ? const Center(child: Text("No dues added yet"))
-            : ListView.builder(
-                itemCount: dues.length,
-                itemBuilder: (context, index) {
-                  final due = dues[index];
+        ListView(
+          padding: const EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: 100,
+          ),
+          children: [
+            const Text(
+              "Upcoming Dues",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
 
-                  return Card(
-                    margin: const EdgeInsets.all(10),
-                    child: ListTile(
-                      leading: Icon(
-                        due["paid"] ? Icons.check_circle : Icons.schedule,
-                        color: due["paid"] ? Colors.green : Colors.orange,
-                      ),
-                      title: Text(due["title"]),
-                      subtitle: Text(
-                        "₹${due["amount"]} • Due ${formatDate(due["dueDate"])}",
-                      ),
-                      trailing: PopupMenuButton<String>(
-                        onSelected: (value) async {
-                          if (value == "delete") {
-                            await ApiService.deleteDue(due["_id"]);
-                            loadDues();
-                          }
+            const SizedBox(height: 12),
 
-                          if (value == "edit") {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => AddDueScreen(due: due),
-                              ),
-                            );
+            if (upcomingDues.isEmpty) const Text("No upcoming dues"),
 
-                            loadDues();
-                          }
-                        },
+            ...upcomingDues.map(
+              (due) => Column(
+                children: [
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
 
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
-                            value: "edit",
-                            child: Text("Edit"),
-                          ),
+                    onTap: () async {
+                      await ApiService.toggleDuePaid(due["_id"]);
 
-                          const PopupMenuItem(
-                            value: "delete",
-                            child: Text("Delete"),
-                          ),
-                        ],
+                      loadDues();
+                    },
+
+                    leading: const Icon(Icons.schedule, color: Colors.orange),
+
+                    title: Text(due["title"]),
+
+                    subtitle: Text(
+                      "₹${due["amount"]} • Due ${formatDate(due["dueDate"])}",
+                    ),
+
+                    trailing: PopupMenuButton<String>(
+                      onSelected: (value) async {
+                        if (value == "delete") {
+                          await ApiService.deleteDue(due["_id"]);
+
+                          loadDues();
+                        }
+
+                        if (value == "edit") {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => AddDueScreen(due: due),
+                            ),
+                          );
+
+                          loadDues();
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(value: "edit", child: Text("Edit")),
+                        const PopupMenuItem(
+                          value: "delete",
+                          child: Text("Delete"),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            const Text(
+              "Paid Dues",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 12),
+
+            if (paidDues.isEmpty) const Text("No paid dues"),
+
+            ...paidDues.map(
+              (due) => Column(
+                children: [
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+
+                    onTap: () async {
+                      await ApiService.toggleDuePaid(due["_id"]);
+
+                      loadDues();
+                    },
+
+                    leading: const Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                    ),
+
+                    title: Text(
+                      due["title"],
+                      style: const TextStyle(
+                        decoration: TextDecoration.lineThrough,
                       ),
                     ),
-                  );
-                },
+
+                    subtitle: Text(
+                      "₹${due["amount"]} • Due ${formatDate(due["dueDate"])}",
+                      style: const TextStyle(
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
+
+                    trailing: PopupMenuButton<String>(
+                      onSelected: (value) async {
+                        if (value == "delete") {
+                          await ApiService.deleteDue(due["_id"]);
+
+                          loadDues();
+                        }
+
+                        if (value == "edit") {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => AddDueScreen(due: due),
+                            ),
+                          );
+
+                          loadDues();
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(value: "edit", child: Text("Edit")),
+                        const PopupMenuItem(
+                          value: "delete",
+                          child: Text("Delete"),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Paid ✓",
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+                ],
               ),
+            ),
+          ],
+        ),
 
         Positioned(
           right: 16,

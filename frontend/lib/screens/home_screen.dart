@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () async {
           await Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const AddDueScreen()),
+            MaterialPageRoute(builder: (_) => const AddExpenseScreen()),
           );
 
           setState(() {});
